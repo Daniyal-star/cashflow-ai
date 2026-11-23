@@ -1,0 +1,351 @@
+{
+  "seed": 42,
+  "preparation": {
+    "rows_raw": 50000,
+    "columns_raw": 19,
+    "exact_duplicates_dropped": 1161,
+    "rows_after_dedup": 48839,
+    "dropped_unparseable_doc_date": 0,
+    "dropped_unparseable_due_date": 0,
+    "rows_after_cleaning": 48839,
+    "open_rows_blank_clear_date": 9681,
+    "clear_date_unparseable": 0,
+    "labelled_rows": 39158,
+    "open_rows_excluded": 9681,
+    "late_rows_delay_gt0": 16418,
+    "delay_mean": 0.8371469431533787,
+    "delay_median": 0.0,
+    "delay_min": -89.0,
+    "delay_max": 204.0
+  },
+  "dataset_sha256": "3409441a8ecc48438a0fd42421ce3230d95305f7afcefb732bf232a948b6cf88",
+  "split": {
+    "train": {
+      "rows": 23494,
+      "doc_date_min": "2018-12-26",
+      "doc_date_max": "2019-08-29"
+    },
+    "validation": {
+      "rows": 7831,
+      "doc_date_min": "2019-08-29",
+      "doc_date_max": "2019-11-18"
+    },
+    "test": {
+      "rows": 7833,
+      "doc_date_min": "2019-11-18",
+      "doc_date_max": "2020-03-02"
+    }
+  },
+  "feature_sets": {
+    "A": [
+      "business_code",
+      "invoice_currency",
+      "document type",
+      "cust_payment_terms",
+      "total_open_amount_log1p",
+      "payment_terms_days",
+      "doc_month",
+      "doc_dayofweek"
+    ],
+    "B": [
+      "business_code",
+      "invoice_currency",
+      "document type",
+      "total_open_amount_log1p",
+      "payment_terms_days",
+      "doc_month",
+      "doc_dayofweek"
+    ],
+    "C": []
+  },
+  "regression_validation": {
+    "median_dummy|C": {
+      "mae": 4.263440173668752,
+      "rmse": 8.988570901127275,
+      "median_ae": 2.0
+    },
+    "random_forest|A": {
+      "mae": 3.4093601916954213,
+      "rmse": 6.645571885525282,
+      "median_ae": 1.866057622482743
+    },
+    "random_forest|B": {
+      "mae": 4.183040177274683,
+      "rmse": 7.666846650358862,
+      "median_ae": 2.463536967969569
+    },
+    "gradient_boosting|A": {
+      "mae": 3.482246903408396,
+      "rmse": 6.713931135598622,
+      "median_ae": 1.9208769788139826
+    },
+    "gradient_boosting|B": {
+      "mae": 4.629831435741955,
+      "rmse": 9.096637463144404,
+      "median_ae": 2.462516669465797
+    }
+  },
+  "regression_test": {
+    "model": "random_forest",
+    "feature_set": "A",
+    "mae": 3.6142721740082555,
+    "rmse": 7.771149178352753,
+    "median_ae": 1.8859424209874613,
+    "median_baseline_mae": 4.250861738797395,
+    "median_baseline_rmse": 9.520463155233417
+  },
+  "regression_test_quantiles": {
+    "actual": {
+      "5": -8.0,
+      "25": -3.0,
+      "50": 0.0,
+      "75": 2.0,
+      "95": 8.0
+    },
+    "predicted": {
+      "5": -6.34139678799686,
+      "25": -1.5396414307952917,
+      "50": 0.7721927741870621,
+      "75": 2.0306819693044647,
+      "95": 7.650661798479834
+    },
+    "abs_error": {
+      "5": 0.19336342268488949,
+      "25": 0.8565611781718112,
+      "50": 1.8859424209874613,
+      "75": 3.7008935731891617,
+      "95": 11.645859115237146
+    }
+  },
+  "classification_validation": {
+    "most_frequent_dummy|C": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.5,
+      "average_precision": 0.42574383859021836,
+      "confusion_matrix": [
+        [
+          4497,
+          0
+        ],
+        [
+          3334,
+          0
+        ]
+      ]
+    },
+    "random_forest|A": {
+      "precision": 0.6220204313280363,
+      "recall": 0.6574685062987402,
+      "f1": 0.6392534266550015,
+      "roc_auc": 0.7531606754032782,
+      "average_precision": 0.6959535238581733,
+      "confusion_matrix": [
+        [
+          3165,
+          1332
+        ],
+        [
+          1142,
+          2192
+        ]
+      ]
+    },
+    "random_forest|B": {
+      "precision": 0.6295045045045045,
+      "recall": 0.502999400119976,
+      "f1": 0.559186395465155,
+      "roc_auc": 0.6979865868053874,
+      "average_precision": 0.6402260698829576,
+      "confusion_matrix": [
+        [
+          3510,
+          987
+        ],
+        [
+          1657,
+          1677
+        ]
+      ]
+    },
+    "gradient_boosting|A": {
+      "precision": 0.6757281553398058,
+      "recall": 0.5218956208758249,
+      "f1": 0.5889321374174987,
+      "roc_auc": 0.7462948704455239,
+      "average_precision": 0.6891026007713005,
+      "confusion_matrix": [
+        [
+          3662,
+          835
+        ],
+        [
+          1594,
+          1740
+        ]
+      ]
+    },
+    "gradient_boosting|B": {
+      "precision": 0.6670588235294118,
+      "recall": 0.34013197360527897,
+      "f1": 0.4505363528009535,
+      "roc_auc": 0.678618379059345,
+      "average_precision": 0.6276391390995966,
+      "confusion_matrix": [
+        [
+          3931,
+          566
+        ],
+        [
+          2200,
+          1134
+        ]
+      ]
+    }
+  },
+  "classification_test": {
+    "model": "random_forest",
+    "feature_set": "A",
+    "precision": 0.5819127419820861,
+    "recall": 0.6551724137931034,
+    "f1": 0.6163733741392502,
+    "roc_auc": 0.7496155625002819,
+    "average_precision": 0.6642628066610239,
+    "confusion_matrix": [
+      [
+        3312,
+        1447
+      ],
+      [
+        1060,
+        2014
+      ]
+    ],
+    "prevalence": 0.39244223158432273
+  },
+  "always_late_test": {
+    "precision": 0.39244223158432273,
+    "recall": 1.0,
+    "f1": 0.5636747043183277,
+    "average_precision": 0.39244223158432273
+  },
+  "ablation": {
+    "classifier_type": "random_forest",
+    "validation_f1_by_feature_set": {
+      "A": 0.6392534266550015,
+      "B": 0.559186395465155,
+      "C": 0.0
+    },
+    "regressor_type": "random_forest",
+    "validation_mae_by_feature_set": {
+      "A": 3.4093601916954213,
+      "B": 4.183040177274683,
+      "C": 4.263440173668752
+    }
+  },
+  "permutation_importance": {
+    "regressor": [
+      {
+        "feature": "cust_payment_terms",
+        "importance_mean": 2.1449263494341144,
+        "importance_std": 0.02020410766693147
+      },
+      {
+        "feature": "business_code",
+        "importance_mean": 0.3218258626774574,
+        "importance_std": 0.027601727955516867
+      },
+      {
+        "feature": "total_open_amount_log1p",
+        "importance_mean": 0.17154818302627825,
+        "importance_std": 0.0073267999705267685
+      },
+      {
+        "feature": "payment_terms_days",
+        "importance_mean": 0.12699375816650135,
+        "importance_std": 0.016322502240687212
+      },
+      {
+        "feature": "doc_dayofweek",
+        "importance_mean": 0.08470037035643303,
+        "importance_std": 0.006650650559385354
+      },
+      {
+        "feature": "invoice_currency",
+        "importance_mean": 0.0005037287823070003,
+        "importance_std": 0.0005887094035138732
+      },
+      {
+        "feature": "doc_month",
+        "importance_mean": 2.6645352591003756e-16,
+        "importance_std": 2.1755839288168295e-16
+      },
+      {
+        "feature": "document type",
+        "importance_mean": 8.881784197001253e-17,
+        "importance_std": 1.7763568394002508e-16
+      }
+    ],
+    "classifier": [
+      {
+        "feature": "cust_payment_terms",
+        "importance_mean": 0.11558922419833455,
+        "importance_std": 0.0028173268390134917
+      },
+      {
+        "feature": "doc_dayofweek",
+        "importance_mean": 0.05165054474261166,
+        "importance_std": 0.003034645963626002
+      },
+      {
+        "feature": "payment_terms_days",
+        "importance_mean": 0.029574315641889483,
+        "importance_std": 0.0018502550219635042
+      },
+      {
+        "feature": "total_open_amount_log1p",
+        "importance_mean": 0.003569838619890198,
+        "importance_std": 0.0030522358018558885
+      },
+      {
+        "feature": "business_code",
+        "importance_mean": 0.0018608551620034719,
+        "importance_std": 0.0019487115956178414
+      },
+      {
+        "feature": "document type",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "doc_month",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "invoice_currency",
+        "importance_mean": -0.0005907420582627942,
+        "importance_std": 0.00223778768105031
+      }
+    ]
+  },
+  "selected": {
+    "regressor": {
+      "model": "random_forest",
+      "feature_set": "A",
+      "selection": "min validation MAE"
+    },
+    "classifier": {
+      "model": "random_forest",
+      "feature_set": "A",
+      "selection": "max validation F1, ROC-AUC tie-break"
+    }
+  },
+  "versions": {
+    "python": "3.14.2",
+    "sklearn": "1.9.1",
+    "pandas": "3.1.1",
+    "numpy": "2.5.5"
+  }
+}

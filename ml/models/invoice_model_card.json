@@ -1,0 +1,203 @@
+{
+  "dataset_path": "ml/data/dataset_project.csv",
+  "dataset_sha256": "3409441a8ecc48438a0fd42421ce3230d95305f7afcefb732bf232a948b6cf88",
+  "row_counts": {
+    "rows_raw": 50000,
+    "columns_raw": 19,
+    "exact_duplicates_dropped": 1161,
+    "rows_after_dedup": 48839,
+    "dropped_unparseable_doc_date": 0,
+    "dropped_unparseable_due_date": 0,
+    "rows_after_cleaning": 48839,
+    "open_rows_blank_clear_date": 9681,
+    "clear_date_unparseable": 0,
+    "labelled_rows": 39158,
+    "open_rows_excluded": 9681,
+    "late_rows_delay_gt0": 16418,
+    "delay_mean": 0.8371469431533787,
+    "delay_median": 0.0,
+    "delay_min": -89.0,
+    "delay_max": 204.0,
+    "train_rows": 31326,
+    "test_rows": 7832
+  },
+  "features": {
+    "categorical": [
+      "business_code",
+      "invoice_currency",
+      "document type",
+      "cust_payment_terms"
+    ],
+    "numeric": [
+      "total_open_amount_log1p",
+      "payment_terms_days",
+      "doc_month",
+      "doc_dayofweek"
+    ],
+    "excluded": [
+      "area_business",
+      "posting_id",
+      "doc_id",
+      "invoice_id",
+      "cust_number",
+      "name_customer",
+      "clear_date",
+      "isOpen"
+    ]
+  },
+  "targets": {
+    "regression": "payment_delay_days = clear_date - due_in_date (days), labelled rows only",
+    "classification": "late = payment_delay_days > 0"
+  },
+  "split": {
+    "method": "chronological by document_create_date; first 80% train, last 20% test",
+    "cut_date": "2019-11-18",
+    "train_date_range": [
+      "2018-12-26",
+      "2019-11-18"
+    ],
+    "test_date_range": [
+      "2019-11-18",
+      "2020-03-02"
+    ]
+  },
+  "test_metrics": {
+    "regression": {
+      "baseline_median_dummy": {
+        "mae": 4.251404494382022,
+        "rmse": 9.521070928425344
+      },
+      "random_forest": {
+        "mae": 3.5371226670504674,
+        "rmse": 7.702302609754041
+      },
+      "gradient_boosting": {
+        "mae": 3.5406522898834667,
+        "rmse": 7.7607580189700665
+      }
+    },
+    "classification": {
+      "baseline_most_frequent_dummy": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.5,
+        "roc_auc_note": "constant predictor; ROC-AUC is 0.5 by definition",
+        "confusion_matrix": [
+          [
+            4758,
+            0
+          ],
+          [
+            3074,
+            0
+          ]
+        ],
+        "confusion_matrix_note": "rows = actual [not late, late]; cols = predicted"
+      },
+      "random_forest": {
+        "precision": 0.5819112627986348,
+        "recall": 0.6655823031880286,
+        "f1": 0.6209408194233688,
+        "roc_auc": 0.7557453829772164,
+        "confusion_matrix": [
+          [
+            3288,
+            1470
+          ],
+          [
+            1028,
+            2046
+          ]
+        ],
+        "confusion_matrix_note": "rows = actual [not late, late]; cols = predicted"
+      },
+      "gradient_boosting": {
+        "precision": 0.6443705857914416,
+        "recall": 0.5045543266102798,
+        "f1": 0.5659551176792557,
+        "roc_auc": 0.746589177751651,
+        "confusion_matrix": [
+          [
+            3902,
+            856
+          ],
+          [
+            1523,
+            1551
+          ]
+        ],
+        "confusion_matrix_note": "rows = actual [not late, late]; cols = predicted"
+      }
+    },
+    "classification_base_rate": {
+      "train_late_share": 0.4259720360084275,
+      "test_late_share": 0.3924923391215526
+    }
+  },
+  "selected_models": {
+    "regressor": "random_forest",
+    "classifier": "random_forest",
+    "selection_basis": "test MAE (regressor); test F1 (classifier)"
+  },
+  "model_classes": {
+    "regressor": "RandomForestRegressor",
+    "classifier": "RandomForestClassifier"
+  },
+  "permutation_importance": {
+    "sample_rows": 5000,
+    "scoring": "neg_mean_absolute_error",
+    "n_repeats": 5,
+    "top10": [
+      {
+        "feature": "cust_payment_terms",
+        "importance_mean": 1.858341736842147,
+        "importance_std": 0.029379316209534906
+      },
+      {
+        "feature": "business_code",
+        "importance_mean": 0.252793185349158,
+        "importance_std": 0.017063368761347546
+      },
+      {
+        "feature": "total_open_amount_log1p",
+        "importance_mean": 0.17782187026331747,
+        "importance_std": 0.01661556748389964
+      },
+      {
+        "feature": "payment_terms_days",
+        "importance_mean": 0.10761573020533585,
+        "importance_std": 0.009614163274636272
+      },
+      {
+        "feature": "doc_dayofweek",
+        "importance_mean": 0.07002176171631672,
+        "importance_std": 0.008659979365368976
+      },
+      {
+        "feature": "doc_month",
+        "importance_mean": 0.027928731057585577,
+        "importance_std": 0.012711441067033714
+      },
+      {
+        "feature": "document type",
+        "importance_mean": 1.7763568394002506e-16,
+        "importance_std": 3.5527136788005016e-16
+      },
+      {
+        "feature": "invoice_currency",
+        "importance_mean": -0.0004164685016742276,
+        "importance_std": 4.1831014341795085e-05
+      }
+    ],
+    "note": "associative, not causal"
+  },
+  "versions": {
+    "python": "3.14.2",
+    "sklearn": "1.9.1",
+    "pandas": "3.1.1",
+    "numpy": "2.5.5"
+  },
+  "seed": 42,
+  "limitation": "selection on test; no hyperparameter search; associative not causal"
+}

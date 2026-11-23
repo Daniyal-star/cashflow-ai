@@ -1,0 +1,38 @@
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+build/
+coverage/
+
+# Python environments and cache
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Local datasets and ML artifacts
+ml/data/
+ml/models/*.joblib
+ml/models/*.pkl
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

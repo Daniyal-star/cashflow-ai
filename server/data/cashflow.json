@@ -1,0 +1,302 @@
+{
+  "settings": {
+    "openingBalance": 10400000,
+    "safetyBuffer": 5000000,
+    "asOfDate": "2025-06-15",
+    "forecastHorizonDays": 30,
+    "defaultPaymentDelayDays": 10,
+    "overdueCollectionDelayDays": 14
+  },
+  "customers": [
+    {
+      "id": "cust-sharma",
+      "name": "Sharma Textiles",
+      "email": "accounts@sharmatextiles.example",
+      "isDemoData": true
+    },
+    {
+      "id": "cust-verma",
+      "name": "Verma Boutique",
+      "phone": "+91-98100-00011",
+      "isDemoData": true
+    },
+    {
+      "id": "cust-mehta",
+      "name": "Mehta Cafe",
+      "isDemoData": true
+    },
+    {
+      "id": "cust-khan",
+      "name": "Khan Stationers",
+      "isDemoData": true
+    },
+    {
+      "id": "cust-desai",
+      "name": "Desai Schools",
+      "isDemoData": true
+    },
+    {
+      "id": "cust-iyer",
+      "name": "Iyer Events",
+      "isDemoData": true
+    }
+  ],
+  "invoices": [
+    {
+      "id": "inv-1040",
+      "invoiceNumber": "INV-1040",
+      "customerId": "cust-mehta",
+      "issueDate": "2025-02-05",
+      "dueDate": "2025-02-20",
+      "amount": 2000000,
+      "status": "paid"
+    },
+    {
+      "id": "inv-1041",
+      "invoiceNumber": "INV-1041",
+      "customerId": "cust-verma",
+      "issueDate": "2025-02-01",
+      "dueDate": "2025-02-15",
+      "amount": 1500000,
+      "status": "paid"
+    },
+    {
+      "id": "inv-1042",
+      "invoiceNumber": "INV-1042",
+      "customerId": "cust-sharma",
+      "issueDate": "2025-03-10",
+      "dueDate": "2025-03-25",
+      "amount": 4500000,
+      "status": "paid"
+    },
+    {
+      "id": "inv-1043",
+      "invoiceNumber": "INV-1043",
+      "customerId": "cust-khan",
+      "issueDate": "2025-04-01",
+      "dueDate": "2025-04-15",
+      "amount": 2200000,
+      "status": "paid"
+    },
+    {
+      "id": "inv-1044",
+      "invoiceNumber": "INV-1044",
+      "customerId": "cust-verma",
+      "issueDate": "2025-04-10",
+      "dueDate": "2025-04-25",
+      "amount": 1600000,
+      "status": "paid"
+    },
+    {
+      "id": "inv-1045",
+      "invoiceNumber": "INV-1045",
+      "customerId": "cust-desai",
+      "issueDate": "2025-05-01",
+      "dueDate": "2025-05-15",
+      "amount": 3000000,
+      "status": "paid"
+    },
+    {
+      "id": "inv-1046",
+      "invoiceNumber": "INV-1046",
+      "customerId": "cust-mehta",
+      "issueDate": "2025-05-20",
+      "dueDate": "2025-06-04",
+      "amount": 2500000,
+      "status": "paid"
+    },
+    {
+      "id": "inv-1047",
+      "invoiceNumber": "INV-1047",
+      "customerId": "cust-sharma",
+      "issueDate": "2025-05-01",
+      "dueDate": "2025-05-16",
+      "amount": 6000000,
+      "status": "overdue"
+    },
+    {
+      "id": "inv-1048",
+      "invoiceNumber": "INV-1048",
+      "customerId": "cust-verma",
+      "issueDate": "2025-06-01",
+      "dueDate": "2025-06-15",
+      "amount": 1000000,
+      "status": "cancelled",
+      "cancelled": true,
+      "notes": "Order withdrawn by customer"
+    },
+    {
+      "id": "inv-1049",
+      "invoiceNumber": "INV-1049",
+      "customerId": "cust-sharma",
+      "issueDate": "2025-06-01",
+      "dueDate": "2025-06-30",
+      "amount": 7500000,
+      "status": "sent"
+    },
+    {
+      "id": "inv-1050",
+      "invoiceNumber": "INV-1050",
+      "customerId": "cust-mehta",
+      "issueDate": "2025-06-05",
+      "dueDate": "2025-07-01",
+      "amount": 3500000,
+      "status": "sent"
+    },
+    {
+      "id": "inv-1051",
+      "invoiceNumber": "INV-1051",
+      "customerId": "cust-khan",
+      "issueDate": "2025-06-03",
+      "dueDate": "2025-07-03",
+      "amount": 2800000,
+      "status": "sent"
+    },
+    {
+      "id": "inv-1052",
+      "invoiceNumber": "INV-1052",
+      "customerId": "cust-desai",
+      "issueDate": "2025-05-20",
+      "dueDate": "2025-07-04",
+      "amount": 4000000,
+      "status": "partially_paid"
+    },
+    {
+      "id": "inv-1053",
+      "invoiceNumber": "INV-1053",
+      "customerId": "cust-iyer",
+      "issueDate": "2025-06-02",
+      "dueDate": "2025-07-02",
+      "amount": 3000000,
+      "status": "sent"
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay-001",
+      "invoiceId": "inv-1040",
+      "date": "2025-02-18",
+      "amount": 2000000,
+      "isDemoData": true
+    },
+    {
+      "id": "pay-002",
+      "invoiceId": "inv-1041",
+      "date": "2025-03-04",
+      "amount": 1500000,
+      "isDemoData": true
+    },
+    {
+      "id": "pay-003",
+      "invoiceId": "inv-1042",
+      "date": "2025-03-20",
+      "amount": 2500000,
+      "isDemoData": true
+    },
+    {
+      "id": "pay-004",
+      "invoiceId": "inv-1042",
+      "date": "2025-04-08",
+      "amount": 2000000,
+      "isDemoData": true
+    },
+    {
+      "id": "pay-005",
+      "invoiceId": "inv-1043",
+      "date": "2025-04-12",
+      "amount": 2200000,
+      "isDemoData": true
+    },
+    {
+      "id": "pay-006",
+      "invoiceId": "inv-1044",
+      "date": "2025-05-09",
+      "amount": 1600000,
+      "isDemoData": true
+    },
+    {
+      "id": "pay-007",
+      "invoiceId": "inv-1045",
+      "date": "2025-05-14",
+      "amount": 3000000,
+      "isDemoData": true
+    },
+    {
+      "id": "pay-008",
+      "invoiceId": "inv-1046",
+      "date": "2025-06-03",
+      "amount": 2500000,
+      "isDemoData": true
+    },
+    {
+      "id": "pay-009",
+      "invoiceId": "inv-1047",
+      "date": "2025-05-30",
+      "amount": 5000000,
+      "isDemoData": true
+    },
+    {
+      "id": "pay-010",
+      "invoiceId": "inv-1052",
+      "date": "2025-06-02",
+      "amount": 1000000,
+      "isDemoData": true
+    }
+  ],
+  "expenses": [
+    {
+      "id": "exp-001",
+      "name": "Studio rent",
+      "category": "rent",
+      "amount": 4500000,
+      "dueDate": "2025-07-01",
+      "recurrence": "monthly",
+      "isDemoData": true
+    },
+    {
+      "id": "exp-002",
+      "name": "Electricity",
+      "category": "utilities",
+      "amount": 900000,
+      "dueDate": "2025-06-20",
+      "recurrence": "monthly",
+      "isDemoData": true
+    },
+    {
+      "id": "exp-003",
+      "name": "Equipment maintenance lease",
+      "category": "equipment",
+      "amount": 1200000,
+      "dueDate": "2025-06-25",
+      "recurrence": "monthly",
+      "isDemoData": true
+    },
+    {
+      "id": "exp-004",
+      "name": "Paper & ink supplier",
+      "category": "supplies",
+      "amount": 800000,
+      "dueDate": "2025-06-18",
+      "recurrence": "weekly",
+      "isDemoData": true
+    },
+    {
+      "id": "exp-005",
+      "name": "Large ink & substrate restock",
+      "category": "supplies",
+      "amount": 3800000,
+      "dueDate": "2025-06-27",
+      "recurrence": "none",
+      "isDemoData": true
+    },
+    {
+      "id": "exp-006",
+      "name": "Equipment repair",
+      "category": "equipment",
+      "amount": 1800000,
+      "dueDate": "2025-06-30",
+      "recurrence": "none",
+      "isDemoData": true
+    }
+  ]
+}
