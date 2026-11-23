@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
-
+const Reminders = lazy(() => import("./pages/Reminders"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Customers = lazy(() => import("./pages/Customers"));
 const CustomerIntelligence = lazy(() => import("./pages/CustomerIntelligence"));
@@ -11,7 +11,7 @@ const ScenarioSimulator = lazy(() => import("./pages/ScenarioSimulator"));
 const AiCfo = lazy(() => import("./pages/AiCfo"));
 const Collections = lazy(() => import("./pages/Collections"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
-
+const ImportAnalytics = lazy(() => import("./pages/ImportAnalytics"));
 const fallback = <div className="p-8 text-sm text-slate-400">Loading…</div>;
 
 export default function App() {
@@ -26,9 +26,7 @@ export default function App() {
         <Route path="customers/manage" element={<Suspense fallback={fallback}><Customers /></Suspense>} />
         <Route path="ai-cfo" element={<Suspense fallback={fallback}><AiCfo /></Suspense>} />
         <Route path="collections" element={<Suspense fallback={fallback}><Collections /></Suspense>} />
-        <Route path="reminders" element={<Suspense fallback={fallback}><ComingSoon title="Reminders" /></Suspense>} />
-        <Route path="import" element={<Suspense fallback={fallback}><ComingSoon title="Import & Analytics" /></Suspense>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="import" element={<Suspense fallback={fallback}><ImportAnalytics /></Suspense>} />            <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   );

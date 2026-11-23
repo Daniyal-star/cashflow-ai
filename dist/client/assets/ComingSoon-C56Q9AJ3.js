@@ -1,1 +1,0 @@
-import{j as t}from"./index-DPHU9tS0.js";import{E as e}from"./States-DbS2FRvN.js";function m({title:o}){return t.jsx(e,{title:o,body:"This module is scheduled for a later milestone."})}export{m as default};

@@ -225,3 +225,35 @@ export function fetchReminders(invoiceId?: string): Promise<ReminderRecord[]> {
   return fetchJson<ReminderRecord[]>(`/api/reminders${qs}`);
 }
 
+/* ---------- CSV Import ---------- */
+
+export type ImportType = "customers" | "invoices";
+
+export interface ImportPreview {
+  type: ImportType;
+  totalRows: number;
+  validCount: number;
+  invalidCount: number;
+  validRows: Array<Record<string, string>>;
+  issues: Array<{ line: number; message: string }>;
+}
+
+export interface ImportResult {
+  type: ImportType;
+  importedCount: number;
+  skippedCount: number;
+  issues: Array<{ line: number; message: string }>;
+}
+
+export const previewImport = (
+  type: ImportType,
+  csv: string,
+): Promise<ImportPreview> =>
+  requestJson<ImportPreview>("POST", "/api/import/preview", { type, csv });
+
+export const confirmImport = (
+  type: ImportType,
+  csv: string,
+): Promise<ImportResult> =>
+  requestJson<ImportResult>("POST", "/api/import/confirm", { type, csv });
+

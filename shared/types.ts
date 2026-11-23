@@ -332,6 +332,7 @@ export interface AiCfoChatResponse {
   providerStatus: AiCfoProviderStatus;
   basis: AiCfoChatBasis;
   intent:
+    | "biggest_customer"
     | "cash_position"
     | "shortage"
     | "today_actions"

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AI CFO chat (Milestone 6.1, intent upgrade M6.2).
  *
  * Deterministic answers come from buildChatContext: every number the chat may use is in a FACT line,
@@ -37,7 +37,7 @@ import { noPaymentPredictions, type PaymentPredictionSource } from "./prediction
 export const CHAT_MAX_MESSAGE_CHARS = 500;
 export const CHAT_MAX_HISTORY = 10;
 
-const DEFAULT_TIMEOUT_MS = 8000;
+const DEFAULT_TIMEOUT_MS = 60000;
 const MAX_ANSWER_CHARS = 1200;
 const TOP_CUSTOMER_FACTS = 3;
 const TOP_ACTIONS = 3;
@@ -54,7 +54,47 @@ export type ChatIntent =
   | "prevention"
   | "general"
   | "forecast"
-  | "receivables";
+  | "receivables"
+  | "biggest_customer";
+
+const CHAT_INTENTS = [
+  "cash_position",
+  "shortage",
+  "today_actions",
+  "collection_priority",
+  "customer_risk",
+  "scenario",
+  "expense_affordability",
+  "prevention",
+  "general",
+  "forecast",
+  "receivables",
+  "biggest_customer",
+] as const;
+
+const questionUnderstandingSchema = z.object({
+  intent: z.enum(CHAT_INTENTS),
+  customerName: z.string().nullable(),
+  amountRupees: z.number().nullable(),
+  delayDays: z.number().int().nullable(),
+});
+
+type QuestionUnderstanding = z.infer<
+  typeof questionUnderstandingSchema
+>;
+
+const NLP_SYSTEM_PROMPT = [
+  "You are the natural language understanding engine of a small-business AI CFO.",
+  "Understand the user's financial question, not answer it.",
+  "Identify the most appropriate supported intent.",
+  "Understand synonyms, informal language, spelling variations and conversational follow-ups.",
+  "Use conversation history to resolve references such as 'that customer' or 'what about them'.",
+  "Only extract customer names that appear in the supplied customer list.",
+  "Do not calculate financial values.",
+  "Use null when a customer, amount or delay is not specified.",
+  "For biggest_customer, identify questions asking which customer contributes the most expected inflows.",
+  'Return JSON only: {"intent":"supported_intent","customerName":null,"amountRupees":null,"delayDays":null}.',
+].join(" ");
 
 export interface ChatContext {
   briefing: AiCfoBriefing;
@@ -239,37 +279,82 @@ export function buildChatContext(dataset: Dataset, adjustments?: ScenarioAdjustm
  * Word-boundary rules on the lower-cased question. Checked in order; the first match wins.
  * `hasAdjustments` is true when the request carries scenario adjustments; those always route to scenario.
  */
+
 export function classifyIntent(question: string, hasAdjustments = false): ChatIntent {
-  const q = question.toLowerCase();
+  const q = question.toLowerCase().trim();
   const test = (re: RegExp): boolean => re.test(q);
 
+  // Scenario questions must be detected first.
   const scenarioCue = /\bwhat if\b|\bwhat happens\b|\bif\b/;
-  const scenarioTiming = /\blate\b|\blater\b|\bdelay(ed)?\b|\bpays?\b|\bpaid\b|\bpostpone\b|\bdefer\b|\bearly\b/;
-  if (hasAdjustments || (test(scenarioCue) && test(scenarioTiming))) return "scenario";
+  const scenarioTiming = /\b(late|later|delay|delayed|pays|pay|paid|postpone|defer|early)\b/;  if (hasAdjustments || (test(scenarioCue) && test(scenarioTiming))) {
+    return "scenario";
+  }
 
-  if (test(/\bafford|\bcan i (pay|buy|spend|take)\b|\bupcoming expenses?\b|\bnew expense\b|\bpurchase\b|\bexpenses? (can|will)\b/)) {
+  // Expense affordability.
+  if (
+    test(/\bafford\b|\bcan i (pay|buy|spend|take)\b|\bupcoming expenses?\b|\bnew expense\b|\bpurchase\b/)
+  ) {
     return "expense_affordability";
   }
-  if (test(/\bprevent|\bavoid|\bstop/) && test(/\bshortage|\bdeficit|\bgap\b|\brun out|\brunning out/)) return "prevention";
-  if (test(/\brun out\b|\brunning out\b|\bruns out\b|\bshortage|\bout of money\b|\bwhy\b.*\b(cash|money|risk)\b/)) return "shortage";
-  if (test(/\bcontact\b|\bcollect\b|\bchase\b|\bfollow up\b|\bwho should i (collect|contact|call|chase)\b/)) {
+
+  // Preventing cash shortages.
+  if (
+    test(/\bprevent|\bavoid|\bstop\b/) &&
+    test(/\bshortage|\bdeficit|\bgap\b|\brun out|\brunning out/)
+  ) {
+    return "prevention";
+  }
+
+  // Cash shortage explanations.
+  if (
+    test(/\brun out\b|\brunning out\b|\bruns out\b|\bshortage\b|\bout of money\b|\bwhy\b.*\b(cash|money|risk)\b/)
+  ) {
+    return "shortage";
+  }
+
+  // Collection priorities.
+  if (
+    test(/\bcontact\b|\bcollect\b|\bchase\b|\bfollow up\b|\bwho should i (collect|contact|call|chase)\b/)
+  ) {
     return "collection_priority";
   }
-  if (test(/\brisky\b|\brisks?\b|\breliab\w*|\blate payers?\b|\bconcentrat\w*|\bdepend\w*|\bwhich customers?\b/)) {
+
+  // Customer reliability and risk.
+  if (
+    test(/\brisky\b|\brisks?\b|\breliab\w*|\blate payers?\b|\bconcentrat\w*|\bdepend\w*|\bwhich customers?\b/)
+  ) {
     return "customer_risk";
   }
-  if (test(/\breceivables?\b|\bowed?\b|\byet to pay\b|\bowing\b|\boutstanding\b|\bunpaid\b|\boverdue\b|\bcustomers? (owe|pay)\b|\bhow much .*\bpay\b/)) {
+
+  // Receivables.
+  if (
+    test(/\breceivables?\b|\bowed?\b|\byet to pay\b|\bowing\b|\boutstanding\b|\bunpaid\b|\boverdue\b|\bcustomers? (owe|pay)\b|\bhow much .*\bpay\b/)
+  ) {
     return "receivables";
   }
-  if (test(/\btoday\b|\bthis week\b|\bshould i do\b|\bwhat should\b|\bnext step\b|\bimprove\b|\baction\b|\brecommend\w*|\bhow can i\b|\bhow do i\b|\bhow to\b|\bfix\b|\bsolve\b|\bwhat can i do\b/)) {
+
+  // Action requests take priority over broad forecast wording.
+  if (
+    test(/\bwhat should\b|\bshould i\b|\bwhat can i do\b|\bhow can i improve\b|\bhow do i improve\b|\bhow to improve\b|\bhow do i fix\b|\bhow can i fix\b|\bnext step\b|\baction\b|\brecommend\w*/)
+  ) {
     return "today_actions";
   }
-  if (test(/\bforecast\b|\bnext (week|month)\b|\boutlook\b|\bprojection\b|\blook like\b|\bfuture\b|\b30 days\b|\bcoming (weeks|days|month)\b/)) {
+
+  // Forecast and future outlook.
+  if (
+    test(/\bforecast\b|\bnext (week|month)\b|\boutlook\b|\bprojection\b|\blook like\b|\bfuture\b|\b30 days\b|\bcoming (weeks|days|month)\b/)
+  ) {
     return "forecast";
   }
-  if (test(/\bcash\b|\bbalance\b|\bavailable\b|\bposition\b|\bhave\b/)) return "cash_position";
+
+  // Available cash and balance.
+  if (test(/\bcash\b|\bbalance\b|\bavailable\b|\bposition\b|\bhave\b/)) {
+    return "cash_position";
+  }
+
   return "general";
 }
+
 
 /* ---------- Deterministic answers ---------- */
 
@@ -297,17 +382,26 @@ function largestOutflowBefore(forecast: ForecastResult, shortageDate: string): {
   return largest;
 }
 
-/** Rupee amount from the question: "₹50,000" first, otherwise the first bare number of at least 1000. Returns rupees. */
+/** Rupee amount from the question: "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¹50,000" first, otherwise the first bare number of at least 1000. Returns rupees. */
 function parseRupees(question: string): number | null {
-  const symbol = /₹\s?([\d,]+)/.exec(question);
-  if (symbol !== null) {
-    const n = Number((symbol[1] ?? "").replace(/,/g, ""));
-    return Number.isSafeInteger(n) && n > 0 ? n : null;
+  const normalized = question.toLowerCase().replace(/,/g, "");
+
+  // Recognize shorthand such as 15k, 15 thousand, Rs 15k.
+  const shorthand = /(?:\b(?:rs|inr)\.?\s*)?(\d+(?:\.\d+)?)\s*(k|thousand)\b/i.exec(normalized);
+
+  if (shorthand !== null) {
+    const value = Number(shorthand[1]) * 1000;
+    return Number.isSafeInteger(value) && value > 0 ? value : null;
   }
-  for (const match of question.matchAll(/\b\d[\d,]*\b/g)) {
-    const n = Number(match[0].replace(/,/g, ""));
-    if (Number.isSafeInteger(n) && n >= 1000) return n;
+
+  // Recognize ordinary amounts such as 15000 or 15,000.
+  for (const match of normalized.matchAll(/\b\d+\b/g)) {
+    const value = Number(match[0]);
+    if (Number.isSafeInteger(value) && value >= 1000) {
+      return value;
+    }
   }
+
   return null;
 }
 
@@ -332,13 +426,42 @@ function scenarioResponse(intent: ChatIntent, label: string, comparison: Scenari
   ]);
 }
 
+async function understandQuestion(
+  question: string,
+  history: AiCfoChatRequest["history"],
+  dataset: Dataset,
+  provider: LlmProvider,
+  signal: AbortSignal,
+): Promise<QuestionUnderstanding | null> {
+  const customerNames = dataset.customers.map((c) => c.name);
+
+  const raw = await provider.complete(
+    NLP_SYSTEM_PROMPT,
+    JSON.stringify({
+      question,
+      history: (history ?? []).slice(-CHAT_MAX_HISTORY),
+      availableCustomers: customerNames,
+    }),
+    signal,
+  );
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const result = questionUnderstandingSchema.safeParse(parsed);
+    return result.success ? result.data : null;
+  } catch {
+    return null;
+  }
+}
+
 export function answerDeterministically(
   question: string,
   dataset: Dataset,
   adjustments?: ScenarioAdjustment[],
+  understanding?: QuestionUnderstanding,
 ): AiCfoChatResponse {
   const hasAdjustments = adjustments !== undefined && adjustments.length > 0;
-  const intent = classifyIntent(question, hasAdjustments);
+  const intent = understanding?.intent ?? classifyIntent(question, hasAdjustments);
   const ctx = buildChatContext(dataset, adjustments);
   const b = ctx.briefing;
   const m = b.metrics;
@@ -346,6 +469,24 @@ export function answerDeterministically(
   const horizon = forecast.horizonDays;
 
   switch (intent) {
+    case "biggest_customer": {
+      if (ctx.intelligence.length === 0) {
+        return respond(intent, "No customer data is available.", []);
+      }
+
+      const biggest = [...ctx.intelligence]
+        .sort((a, b) => b.concentrationShare - a.concentrationShare)[0];
+
+      if (biggest === undefined || biggest.concentrationShare <= 0) {
+        return respond(intent, "I couldn't identify a customer with measurable expected inflows.", []);
+      }
+
+      return respond(
+        intent,
+        `${biggest.customerName} is your biggest customer by expected-inflow concentration, contributing ${pct(biggest.concentrationShare)} of expected inflows. Their outstanding balance is ${formatRupees(biggest.outstanding)}.`,
+        [concentrationLine(biggest), customerOutstandingLine(biggest)],
+      );
+    }
     case "shortage": {
       if (m.shortageDate === null) {
         return respond(
@@ -506,34 +647,61 @@ export function answerDeterministically(
     }
 
     case "scenario": {
-      if (ctx.comparison !== null) return scenarioResponse(intent, "the adjusted case", ctx.comparison);
+      if (ctx.comparison !== null) {
+        return scenarioResponse(intent, "the adjusted case", ctx.comparison);
+      }
 
       const q = question.toLowerCase();
-      const customer = [...dataset.customers]
-        .filter((c) => q.includes(c.name.toLowerCase()))
-        .sort((a, b) => b.name.length - a.name.length)[0];
+      const requestedName = understanding?.customerName?.trim();
+
+      const customer =
+        (requestedName
+          ? dataset.customers.find(
+              (c) => c.name.toLowerCase() === requestedName.toLowerCase(),
+            )
+          : undefined) ??
+        [...dataset.customers]
+          .filter((c) => q.includes(c.name.toLowerCase()))
+          .sort((a, b) => b.name.length - a.name.length)[0];
+
       if (customer === undefined) {
         return respond(
           intent,
-          "I could not find a customer with that name in your data, so this scenario cannot be run here. Name the customer exactly as it appears, or test the case in the Scenario Simulator.",
+          "Which customer would you like to test? I could not find that customer. Please use a customer name from your data or try the Scenario Simulator.",
           [],
         );
       }
+
       const dayMatch = /(\d+)\s*days?/.exec(q);
-      if (dayMatch === null) {
+      const delayDays =
+        understanding?.delayDays ??
+        (dayMatch ? Number(dayMatch[1]) : null);
+
+      if (delayDays === null || !Number.isInteger(delayDays) || delayDays < 0) {
         return respond(
           intent,
-          `To run this scenario for ${customer.name}, state how many days late they pay. You can also test it in the Scenario Simulator.`,
+          `How many days late should ${customer.name} pay?`,
           [],
         );
       }
-      const days = Number(dayMatch[1]);
-      const comparison = compareScenario(dataset, [{ type: "customer_delay", customerId: customer.id, days }]);
-      return scenarioResponse(intent, `${customer.name} paying ${dayCount(days)} late`, comparison);
+
+      const comparison = compareScenario(dataset, [
+        {
+          type: "customer_delay",
+          customerId: customer.id,
+          days: delayDays,
+        },
+      ]);
+
+      return scenarioResponse(
+        intent,
+        `${customer.name} paying ${dayCount(delayDays)} late`,
+        comparison,
+      );
     }
 
     case "expense_affordability": {
-      const rupees = parseRupees(question);
+      const rupees = understanding?.amountRupees ?? parseRupees(question);
       if (rupees === null) {
         const facts: Array<string | undefined> = [
           minimumLine(b),
@@ -605,6 +773,13 @@ export function answerDeterministically(
         m.shortageDate !== null ? shortageLine(b) : minimumLine(b),
       ]);
     }
+    default: {
+     return respond(
+       "general",
+       "I couldn't determine exactly what you're asking. Could you rephrase your question?",
+       [],
+     );
+   }
   }
 }
 
@@ -643,24 +818,20 @@ export async function answerChat(
   req: AiCfoChatRequest,
   options: ChatOptions = {},
 ): Promise<AiCfoChatResponse> {
-  const deterministic = answerDeterministically(req.message, dataset, req.adjustments);
-  // Accepted for M7; intentionally unused in answers (see ChatOptions.predictionSource).
-  const predictionSource: PaymentPredictionSource = options.predictionSource ?? noPaymentPredictions;
+  const predictionSource: PaymentPredictionSource =
+    options.predictionSource ?? noPaymentPredictions;
   void predictionSource;
 
   const provider = options.provider;
-  if (provider === null || provider === undefined) return deterministic;
+
+  if (provider === null || provider === undefined) {
+    return answerDeterministically(req.message, dataset, req.adjustments);
+  }
 
   const history = (req.history ?? []).slice(-CHAT_MAX_HISTORY);
-  const userContent = JSON.stringify({
-    question: req.message,
-    intent: deterministic.intent,
-    facts: deterministic.facts,
-    history,
-  });
-
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
+
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
       controller.abort();
@@ -668,9 +839,53 @@ export async function answerChat(
     }, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
   });
 
-  let raw: string;
+  let understanding: QuestionUnderstanding | null = null;
+
+  // STEP 1: NLP question understanding
   try {
-    raw = await Promise.race([provider.complete(SYSTEM_PROMPT, userContent, controller.signal), timeout]);
+    understanding = await Promise.race([
+      understandQuestion(
+        req.message,
+        history,
+        dataset,
+        provider,
+        controller.signal,
+      ),
+      timeout,
+    ]);
+  } catch {
+    const fallback = answerDeterministically(
+      req.message,
+      dataset,
+      req.adjustments,
+    );
+    clearTimeout(timer);
+    return { ...fallback, providerStatus: "unavailable" };
+  }
+
+  // STEP 2: Deterministic financial answer using NLP understanding
+  const deterministic = answerDeterministically(
+    req.message,
+    dataset,
+    req.adjustments,
+    understanding ?? undefined,
+  );
+
+  const userContent = JSON.stringify({
+    question: req.message,
+    intent: deterministic.intent,
+    facts: deterministic.facts,
+    history,
+  });
+
+  // STEP 3: AI wording, restricted to verified financial facts
+  let raw: string;
+
+  try {
+    raw = await Promise.race([
+      provider.complete(SYSTEM_PROMPT, userContent, controller.signal),
+      timeout,
+    ]);
   } catch {
     return { ...deterministic, providerStatus: "unavailable" };
   } finally {
@@ -678,22 +893,31 @@ export async function answerChat(
   }
 
   let parsed: unknown;
+
   try {
     parsed = JSON.parse(raw);
   } catch {
     return { ...deterministic, providerStatus: "invalid_output" };
   }
-  const result = chatOutputSchema.safeParse(parsed);
-  if (!result.success) return { ...deterministic, providerStatus: "invalid_output" };
 
-  // Number guard: every figure in the AI answer must appear in the fact lines used for this answer.
+  const result = chatOutputSchema.safeParse(parsed);
+
+  if (!result.success) {
+    return { ...deterministic, providerStatus: "invalid_output" };
+  }
+
   const allowed = new Set(numericTokens(deterministic.facts.join(" ")));
   const answer = result.data.answer;
-  // List numerals ("1. ", "2. ") at the start of a line are formatting, not figures; they are not checked.
   const figures = answer.replace(/^\s*\d+\.\s/gm, "");
+
   if (numericTokens(figures).some((token) => !allowed.has(token))) {
     return { ...deterministic, providerStatus: "invalid_output" };
   }
 
-  return { ...deterministic, answer, source: "ai", providerStatus: "ok" };
+  return {
+    ...deterministic,
+    answer,
+    source: "ai",
+    providerStatus: "ok",
+  };
 }

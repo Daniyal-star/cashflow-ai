@@ -10,6 +10,7 @@ import { createIntelligenceRouter } from "./routes/intelligence.js";
 import { createCfoRouter } from "./routes/cfo.js";
 import { createCollectionsRouter } from "./routes/collections.js";
 import { createRemindersRouter } from "./routes/reminders.js";
+import { createImportRouter } from "./routes/imports.js";
 
 export interface CreateAppOptions {
   /** JSON data file path. Defaults to DATA_FILE, then server/data/cashflow.json. */
@@ -41,7 +42,7 @@ export function createApp(options: CreateAppOptions = {}): express.Express {
   app.use("/api/cfo", createCfoRouter(repo));
   app.use("/api/collections", createCollectionsRouter(repo));
   app.use("/api/reminders", createRemindersRouter(repo));
-
+  app.use("/api/import", createImportRouter(repo));
   return app;
 }
 

@@ -1,1 +1,19 @@
 node_modules
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated builds
+node_modules/
+dist/
+client/dist/
+
+# Local archives and backups
+*.zip
+*.bak
+*.nlp-backup
+
+# Logs
+*.log
