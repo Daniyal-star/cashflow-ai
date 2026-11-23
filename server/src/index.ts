@@ -11,7 +11,7 @@ import { createCfoRouter } from "./routes/cfo.js";
 import { createCollectionsRouter } from "./routes/collections.js";
 import { createRemindersRouter } from "./routes/reminders.js";
 import { createImportRouter } from "./routes/imports.js";
-
+import * as path from "node:path";
 export interface CreateAppOptions {
   /** JSON data file path. Defaults to DATA_FILE, then server/data/cashflow.json. */
   dataFile?: string;
@@ -43,12 +43,22 @@ export function createApp(options: CreateAppOptions = {}): express.Express {
   app.use("/api/collections", createCollectionsRouter(repo));
   app.use("/api/reminders", createRemindersRouter(repo));
   app.use("/api/import", createImportRouter(repo));
+    // Serve the production React frontend.
+  const clientDist = path.resolve(process.cwd(), "dist", "client");
+
+  app.use(express.static(clientDist));
+
+  // React Router fallback.
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api/")) return next();
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
   return app;
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const port = Number(process.env.PORT ?? 4000);
-  createApp().listen(port, () => {
-    console.log(`CASHFLOW AI API listening on http://localhost:${port}`);
+    createApp().listen(port, "0.0.0.0", () => {
+    console.log(`CASHFLOW AI listening on port ${port}`);
   });
 }
